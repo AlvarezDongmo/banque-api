@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🏦 Banque API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; color: #333; }
+    header { background: #1a3c5e; color: white; padding: 20px 40px; display: flex; align-items: center; gap: 15px; }
+    header h1 { font-size: 24px; }
+    nav { background: #2c5f8a; display: flex; gap: 5px; padding: 10px 40px; flex-wrap: wrap; }
+    nav button { background: transparent; color: white; border: 2px solid transparent; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    nav button:hover, nav button.active { background: white; color: #2c5f8a; font-weight: bold; }
+    .page { display: none; padding: 40px; max-width: 800px; margin: 0 auto; }
+    .page.active { display: block; }
+    .card { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h2 { color: #1a3c5e; margin-bottom: 20px; font-size: 20px; }
+    input, select { width: 100%; padding: 12px; margin: 8px 0 16px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
+    input:focus { outline: none; border-color: #2c5f8a; }
+    label { font-weight: bold; color: #555; font-size: 14px; }
+    .btn { background: #1a3c5e; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-size: 15px; width: 100%; transition: background 0.2s; }
+    .btn:hover { background: #2c5f8a; }
+    .btn-green { background: #27ae60; }
+    .btn-green:hover { background: #219a52; }
+    .btn-red { background: #e74c3c; }
+    .btn-red:hover { background: #c0392b; }
+    .message { padding: 12px 16px; border-radius: 6px; margin-top: 15px; font-size: 14px; display: none; }
+    .message.succes { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+    .message.erreur { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table th { background: #1a3c5e; color: white; padding: 12px; text-align: left; font-size: 13px; }
+    table td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+    table tr:hover td { background: #f9f9f9; }
+    .solde { font-weight: bold; color: #27ae60; }
+    .accueil-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
+    .accueil-card { background: white; border-radius: 10px; padding: 25px; text-align: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; border-top: 4px solid #1a3c5e; }
+    .accueil-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+    .accueil-card .icon { font-size: 40px; margin-bottom: 12px; }
+    .accueil-card h3 { color: #1a3c5e; font-size: 16px; }
+    .accueil-card p { color: #888; font-size: 13px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:36px">🏦</span>
+  <div>
+    <h1>Système Bancaire</h1>
+    <p style="font-size:13px; opacity:0.8">Gestion des comptes et transactions</p>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="afficherPage('accueil', this)">🏠 Accueil</button>
+  <button onclick="afficherPage('creer', this)">➕ Créer un compte</button>
+  <button onclick="afficherPage('lister', this)">📋 Liste des comptes</button>
+  <button onclick="afficherPage('depot', this)">💰 Faire un dépôt</button>
+  <button onclick="afficherPage('retrait', this)">💸 Faire un retrait</button>
+</nav>
+
+<!-- PAGE ACCUEIL -->
+<div id="accueil" class="page active">
+  <div class="card">
+    <h2>👋 Bienvenue sur l'API Bancaire</h2>
+    <p style="color:#666">Utilisez le menu en haut pour naviguer entre les fonctionnalités.</p>
+  </div>
+  <div class="accueil-grid">
+    <div class="accueil-card" onclick="afficherPage('creer', null)">
+      <div class="icon">➕</div>
+      <h3>Créer un compte</h3>
+      <p>Ouvrir un nouveau compte bancaire</p>
+    </div>
+    <div class="accueil-card" onclick="afficherPage('lister', null)">
+      <div class="icon">📋</div>
+      <h3>Liste des comptes</h3>
+      <p>Voir tous les comptes existants</p>
+    </div>
+    <div class="accueil-card" onclick="afficherPage('depot', null)">
+      <div class="icon">💰</div>
+      <h3>Faire un dépôt</h3>
+      <p>Déposer de l'argent sur un compte</p>
+    </div>
+    <div class="accueil-card" onclick="afficherPage('retrait', null)">
+      <div class="icon">💸</div>
+      <h3>Faire un retrait</h3>
+      <p>Retirer de l'argent d'un compte</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE CRÉER UN COMPTE -->
+<div id="creer" class="page">
+  <div class="card">
+    <h2>➕ Créer un nouveau compte</h2>
+    <label>Nom</label>
+    <input type="text" id="nom" placeholder="Ex: Dupont" />
+    <label>Prénom</label>
+    <input type="text" id="prenom" placeholder="Ex: Jean" />
+    <label>Email</label>
+    <input type="email" id="email" placeholder="Ex: jean@example.com" />
+    <button class="btn" onclick="creerCompte()">✅ Créer le compte</button>
+    <div id="msg-creer" class="message"></div>
+  </div>
+</div>
+
+<!-- PAGE LISTE DES COMPTES -->
+<div id="lister" class="page">
+  <div class="card">
+    <h2>📋 Liste des comptes</h2>
+    <button class="btn" onclick="chargerComptes()" style="width:auto; margin-bottom:20px">🔄 Actualiser</button>
+    <div id="liste-comptes">
+      <p style="color:#888">Cliquez sur Actualiser pour charger les comptes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE DÉPÔT -->
+<div id="depot" class="page">
+  <div class="card">
+    <h2>💰 Faire un dépôt</h2>
+    <label>Sélectionner un compte</label>
+    <select id="depot-compte">
+      <option value="">-- Choisir un compte --</option>
+    </select>
+    <label>Montant (FCFA)</label>
+    <input type="number" id="depot-montant" placeholder="Ex: 50000" min="1" />
+    <label>Description (optionnelle)</label>
+    <input type="text" id="depot-desc" placeholder="Ex: Salaire du mois" />
+    <button class="btn btn-green" onclick="faireDepot()">💰 Confirmer le dépôt</button>
+    <div id="msg-depot" class="message"></div>
+  </div>
+</div>
+
+<!-- PAGE RETRAIT -->
+<div id="retrait" class="page">
+  <div class="card">
+    <h2>💸 Faire un retrait</h2>
+    <label>Sélectionner un compte</label>
+    <select id="retrait-compte">
+      <option value="">-- Choisir un compte --</option>
+    </select>
+    <label>Montant (FCFA)</label>
+    <input type="number" id="retrait-montant" placeholder="Ex: 10000" min="1" />
+    <label>Description (optionnelle)</label>
+    <input type="text" id="retrait-desc" placeholder="Ex: Courses" />
+    <button class="btn btn-red" onclick="faireRetrait()">💸 Confirmer le retrait</button>
+    <div id="msg-retrait" class="message"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer style="background:#1a3c5e; color:white; text-align:center; padding:20px 40px; font-size:13px; margin-top:40px;">
+  <p>© 2025 <strong>Alvarez Dongmo</strong> — Tous droits réservés</p>
+  <p style="margin-top:6px; opacity:0.8">
+    🌐 <a href="https://alvarez3tech.com" target="_blank" style="color:#90caf9; text-decoration:none;">alvarez3tech.com</a>
+    &nbsp;|&nbsp;
+    ✉️ <a href="mailto:contact@alvarez3tech.com" style="color:#90caf9; text-decoration:none;">contact@alvarez3tech.com</a>
+    &nbsp;|&nbsp;
+    <span onclick="afficherPolitique()" style="cursor:pointer; color:#90caf9;">📄 Politique de confidentialité</span>
+  </p>
+</footer>
+
+<!-- MODAL POLITIQUE DE CONFIDENTIALITÉ -->
+<div id="modal-politique" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; justify-content:center; align-items:center;">
+  <div style="background:white; border-radius:10px; padding:40px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto; position:relative;">
+    <button onclick="fermerPolitique()" style="position:absolute; top:15px; right:20px; background:none; border:none; font-size:24px; cursor:pointer; color:#333;">✕</button>
+    <h2 style="color:#1a3c5e; margin-bottom:20px;">📄 Politique de Confidentialité</h2>
+    <p style="color:#555; line-height:1.7; margin-bottom:15px;">
+      <strong>Auteur :</strong> Alvarez Dongmo<br>
+      <strong>Site :</strong> <a href="https://alvarez3tech.com" target="_blank" style="color:#2c5f8a;">alvarez3tech.com</a><br>
+      <strong>Contact :</strong> <a href="mailto:contact@alvarez3tech.com" style="color:#2c5f8a;">contact@alvarez3tech.com</a>
+    </p>
+    <h3 style="color:#1a3c5e; margin-bottom:10px;">1. Collecte des données</h3>
+    <p style="color:#555; line-height:1.7; margin-bottom:15px;">
+      Cette application collecte uniquement les informations nécessaires à la création et à la gestion des comptes bancaires : nom, prénom et adresse email.
+    </p>
+    <h3 style="color:#1a3c5e; margin-bottom:10px;">2. Utilisation des données</h3>
+    <p style="color:#555; line-height:1.7; margin-bottom:15px;">
+      Les données collectées sont utilisées exclusivement pour identifier les titulaires de comptes et effectuer les opérations bancaires (dépôts, retraits). Elles ne sont ni vendues ni partagées avec des tiers.
+    </p>
+    <h3 style="color:#1a3c5e; margin-bottom:10px;">3. Sécurité</h3>
+    <p style="color:#555; line-height:1.7; margin-bottom:15px;">
+      Toutes les transactions sont validées côté serveur. Les montants négatifs et les retraits dépassant le solde disponible sont automatiquement refusés.
+    </p>
+    <h3 style="color:#1a3c5e; margin-bottom:10px;">4. Contact</h3>
+    <p style="color:#555; line-height:1.7;">
+      Pour toute question relative à la confidentialité, contactez-nous via
+      <a href="https://alvarez3tech.com" target="_blank" style="color:#2c5f8a;">alvarez3tech.com</a>
+      ou par email :
+      <a href="mailto:contact@alvarez3tech.com" style="color:#2c5f8a;">contact@alvarez3tech.com</a>.
+    </p>
+    <button onclick="fermerPolitique()" style="margin-top:25px; background:#1a3c5e; color:white; border:none; padding:10px 25px; border-radius:6px; cursor:pointer; font-size:14px;">Fermer</button>
+  </div>
+</div>
+
+<script>
+  const API = '';
+
+  function afficherPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    if (id === 'lister') chargerComptes();
+    if (id === 'depot' || id === 'retrait') chargerComptesSelect();
+  }
+
+  function afficherMessage(idElement, succes, texte) {
+    const el = document.getElementById(idElement);
+    el.className = 'message ' + (succes ? 'succes' : 'erreur');
+    el.textContent = texte;
+  }
+
+  async function creerCompte() {
+    const nom = document.getElementById('nom').value.trim();
+    const prenom = document.getElementById('prenom').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!nom || !prenom || !email) {
+      afficherMessage('msg-creer', false, '❌ Tous les champs sont obligatoires !');
+      return;
+    }
+    try {
+      const res = await fetch('/api/comptes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nom, prenom, email })
+      });
+      const data = await res.json();
+      if (data.succes) {
+        afficherMessage('msg-creer', true, `✅ Compte créé ! ID: ${data.compte.id}`);
+        document.getElementById('nom').value = '';
+        document.getElementById('prenom').value = '';
+        document.getElementById('email').value = '';
+      } else {
+        afficherMessage('msg-creer', false, '❌ ' + data.message);
+      }
+    } catch (e) {
+      afficherMessage('msg-creer', false, '❌ Erreur de connexion au serveur.');
+    }
+  }
+
+  async function chargerComptes() {
+    const container = document.getElementById('liste-comptes');
+    container.innerHTML = '<p style="color:#888">Chargement...</p>';
+    try {
+      const res = await fetch('/api/comptes');
+      const data = await res.json();
+      if (!data.comptes.length) {
+        container.innerHTML = '<p style="color:#888">Aucun compte trouvé. Créez un compte d\'abord !</p>';
+        return;
+      }
+      container.innerHTML = `
+        <table>
+          <thead><tr><th>Nom Complet</th><th>Email</th><th>Solde</th><th>Date Création</th></tr></thead>
+          <tbody>
+            ${data.comptes.map(c => `
+              <tr>
+                <td><strong>${c.prenom} ${c.nom}</strong></td>
+                <td>${c.email}</td>
+                <td class="solde">${c.solde.toLocaleString()} FCFA</td>
+                <td>${new Date(c.dateCreation).toLocaleDateString('fr-FR')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <p style="margin-top:12px; color:#888; font-size:13px">Total : <strong>${data.total}</strong> compte(s)</p>
+      `;
+    } catch (e) {
+      container.innerHTML = '<p style="color:red">Erreur de connexion au serveur.</p>';
+    }
+  }
+
+  async function chargerComptesSelect() {
+    try {
+      const res = await fetch('/api/comptes');
+      const data = await res.json();
+      const options = data.comptes.map(c =>
+        `<option value="${c.id}">${c.prenom} ${c.nom} — ${c.solde.toLocaleString()} FCFA</option>`
+      ).join('');
+      document.getElementById('depot-compte').innerHTML = '<option value="">-- Choisir un compte --</option>' + options;
+      document.getElementById('retrait-compte').innerHTML = '<option value="">-- Choisir un compte --</option>' + options;
+    } catch (e) {}
+  }
+
+  async function faireDepot() {
+    const idCompte = document.getElementById('depot-compte').value;
+    const montant = parseFloat(document.getElementById('depot-montant').value);
+    const description = document.getElementById('depot-desc').value;
+    if (!idCompte || !montant) {
+      afficherMessage('msg-depot', false, '❌ Veuillez sélectionner un compte et entrer un montant.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/transactions/depot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idCompte, montant, description })
+      });
+      const data = await res.json();
+      if (data.succes) {
+        afficherMessage('msg-depot', true, `✅ ${data.message} — Nouveau solde : ${data.nouveauSolde.toLocaleString()} FCFA`);
+        document.getElementById('depot-montant').value = '';
+        chargerComptesSelect();
+      } else {
+        afficherMessage('msg-depot', false, '❌ ' + data.message);
+      }
+    } catch (e) {
+      afficherMessage('msg-depot', false, '❌ Erreur de connexion.');
+    }
+  }
+
+  async function faireRetrait() {
+    const idCompte = document.getElementById('retrait-compte').value;
+    const montant = parseFloat(document.getElementById('retrait-montant').value);
+    const description = document.getElementById('retrait-desc').value;
+    if (!idCompte || !montant) {
+      afficherMessage('msg-retrait', false, '❌ Veuillez sélectionner un compte et entrer un montant.');
+      return;
+    }
+    try {
+      const res = await fetch('/api/transactions/retrait', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idCompte, montant, description })
+      });
+      const data = await res.json();
+      if (data.succes) {
+        afficherMessage('msg-retrait', true, `✅ ${data.message} — Nouveau solde : ${data.nouveauSolde.toLocaleString()} FCFA`);
+        document.getElementById('retrait-montant').value = '';
+        chargerComptesSelect();
+      } else {
+        afficherMessage('msg-retrait', false, '❌ ' + data.message);
+      }
+    } catch (e) {
+      afficherMessage('msg-retrait', false, '❌ Erreur de connexion.');
+    }
+  }
+
+  function afficherPolitique() {
+    document.getElementById('modal-politique').style.display = 'flex';
+  }
+  function fermerPolitique() {
+    document.getElementById('modal-politique').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
